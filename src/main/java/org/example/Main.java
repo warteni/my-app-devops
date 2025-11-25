@@ -1,16 +1,12 @@
 package org.example;
 
-/**
- * Application DevOps - Bonjour Malek
- */
 public class Main {
-
     public static void main(String[] args) {
-        System.out.println(getMessage());
+        System.out.println("🚀 Bonjour DevOps - NOUVELLE FEATURE CI/CD !");
     }
 
     public static String getMessage() {
-        return "🚀 Bonjour DevOps - CI/CD avec Jenkins, Maven et Tomcat !";
+        return "🚀 Bonjour DevOps - NOUVELLE FEATURE CI/CD !";
     }
 
     public String greet(String name) {
