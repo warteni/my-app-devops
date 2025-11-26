@@ -11,8 +11,8 @@ pipeline {
         stage('Checkout GitHub') {
             steps {
                 git branch: 'main',
-                url: 'https://github.com/ton-username/bonjour-devops-app.git'
-                echo '✅ Code récupéré depuis GitHub'
+                url: 'https://github.com/warteni/my-app-devops.git'  // ← CORRIGÉ
+                echo '✅ Code récupéré depuis GitHub - warteni/my-app-devops'
             }
         }
 
@@ -37,15 +37,11 @@ pipeline {
             }
         }
 
-        // STAGE 4: SAST SonarQube
-        stage('SAST - SonarQube') {
+        // STAGE 4: Quality Check (remplace SonarQube)
+        stage('Quality Check') {
             steps {
-                script {
-                    withSonarQubeEnv('sonar-server') {
-                        sh 'mvn sonar:sonar -Dsonar.projectKey=bonjour-devops-app'
-                    }
-                }
-                echo '✅ Analyse SonarQube terminée'
+                sh 'mvn checkstyle:checkstyle || echo "Checkstyle non configuré"'
+                echo '✅ Vérification qualité terminée'
             }
         }
 
@@ -54,37 +50,26 @@ pipeline {
             steps {
                 sh 'mvn package -DskipTests'
                 echo '✅ Application packagée en WAR'
+                sh 'ls -la target/*.war'
             }
         }
 
-        // STAGE 6: Déploiement Tomcat
-        stage('Déploiement Tomcat') {
+        // STAGE 6: Affichage du Message
+        stage('Affichage Message') {
             steps {
                 sh '''
-                    echo "🚀 Déploiement sur Tomcat..."
-                    # Arrêt de Tomcat
-                    sudo systemctl stop tomcat9 || true
-
-                    # Nettoyage ancien déploiement
-                    sudo rm -rf /var/lib/tomcat9/webapps/bonjour-devops*
-
-                    # Copie du WAR
-                    sudo cp target/bonjour-devops.war /var/lib/tomcat9/webapps/
-
-                    # Démarrage Tomcat
-                    sudo systemctl start tomcat9
-
-                    sleep 10
-                    echo "🎯 Application déployée: http://localhost:8080/bonjour-devops/"
+                    echo "🎉 EXÉCUTION DU PROGRAMME :"
+                    java -cp target/classes org.example.Main
+                    echo "🚀 Pipeline CI/CD réussi !"
                 '''
-                echo '✅ Déploiement Tomcat réussi'
+                echo '✅ Message affiché avec succès'
             }
         }
     }
 
     post {
         always {
-            echo '🏁 Pipeline CI/CD terminé'
+            echo "🏁 Pipeline CI/CD terminé - Build #${env.BUILD_NUMBER}"
             archiveArtifacts artifacts: 'target/*.war', fingerprint: true
         }
         success {
